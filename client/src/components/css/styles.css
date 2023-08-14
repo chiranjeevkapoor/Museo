@@ -1,0 +1,20 @@
+.musicPlayer {
+  height: 140px;
+  width: 100%;
+  background-color: teal;
+  position: fixed;
+  bottom: 0;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.btnStyle {
+  height: 60px;
+  width: 60px;
+}
+
+.card {
+  height: 50px;
+  background-color: aliceblue;
+  margin-bottom: 20px;
+}
