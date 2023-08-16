@@ -1,7 +1,7 @@
 import { AiFillPlayCircle, AiFillPauseCircle } from "react-icons/ai"; // icons for play and pause
 import { BiSkipNext, BiSkipPrevious } from "react-icons/bi";
 import "./css/styles.css";
-import { useRef } from "react";
+import { useRef, useState, useCallback } from "react";
 import ProgressBar from "./ProgressBar";
 
 const MusicPlayer = ({
@@ -11,17 +11,37 @@ const MusicPlayer = ({
   isPlaying,
   setIsPlaying,
 }) => {
+  //
   const audioref = useRef();
+  const progressBarRef = useRef();
+  const [timeProgress, setTimeProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const playAnimationRef = useRef();
+
+  const repeat = useCallback(() => {
+    // console.log("run");
+    const currentTime = audioref.current.currentTime;
+    setTimeProgress(currentTime);
+    progressBarRef.current.value = currentTime;
+    progressBarRef.current.style.setProperty(
+      "--range-progress",
+      `${(progressBarRef.current.value / duration) * 100}%`
+    );
+    playAnimationRef.current = requestAnimationFrame(repeat);
+  }, [audioref, duration, progressBarRef, setTimeProgress]);
+  //
   const playbtn = () => {
     if (isPlaying) {
       setIsPlaying(false);
       audioref.current.pause();
+      cancelAnimationFrame(playAnimationRef.current);
     } else {
       setIsPlaying(true);
       audioref.current.play();
+      playAnimationRef.current = requestAnimationFrame(repeat);
     }
   };
-
+  //
   const nextMusic = () => {
     setIsPlaying(true);
     let nextsong = list.indexOf(music_name) + 1;
@@ -31,7 +51,7 @@ const MusicPlayer = ({
     setMusicName(list[nextsong]);
     // console.log(list.indexOf(music_name));
   };
-
+  //
   const prevMusic = () => {
     setIsPlaying(true);
     let nextsong = list.indexOf(music_name) - 1;
@@ -41,6 +61,13 @@ const MusicPlayer = ({
     setMusicName(list[nextsong]);
     // console.log(list.indexOf(music_name));
   };
+
+  const onLoadedMetadata = () => {
+    const seconds = audioref.current.duration;
+    setDuration(seconds);
+    progressBarRef.current.max = seconds;
+  };
+
   return (
     <footer
       className="musicPlayer"
@@ -52,6 +79,7 @@ const MusicPlayer = ({
         controls
         ref={audioref}
         style={{ display: "none" }}
+        onLoadedMetadata={onLoadedMetadata}
       />
       <button className="btnStyle" onClick={prevMusic}>
         <BiSkipPrevious />
@@ -71,7 +99,12 @@ const MusicPlayer = ({
       <button className="btnStyle" onClick={nextMusic}>
         <BiSkipNext />
       </button>
-      <ProgressBar />
+      <ProgressBar
+        progressBarRef={progressBarRef}
+        audioref={audioref}
+        timeProgress={timeProgress}
+        duration={duration}
+      />
     </footer>
   );
 };
