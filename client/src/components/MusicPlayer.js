@@ -1,7 +1,7 @@
 import { AiFillPlayCircle, AiFillPauseCircle } from "react-icons/ai"; // icons for play and pause
 import { BiSkipNext, BiSkipPrevious } from "react-icons/bi";
 import "./css/styles.css";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import ProgressBar from "./ProgressBar";
 
 const MusicPlayer = ({
@@ -17,6 +17,10 @@ const MusicPlayer = ({
   const [timeProgress, setTimeProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const playAnimationRef = useRef();
+  //
+  const togglePlayPause = () => {
+    setIsPlaying((prev) => !prev);
+  };
 
   const repeat = useCallback(() => {
     // console.log("run");
@@ -29,19 +33,7 @@ const MusicPlayer = ({
     );
     playAnimationRef.current = requestAnimationFrame(repeat);
   }, [audioref, duration, progressBarRef, setTimeProgress]);
-  //
-  const playbtn = () => {
-    if (isPlaying) {
-      setIsPlaying(false);
-      audioref.current.pause();
-      cancelAnimationFrame(playAnimationRef.current);
-    } else {
-      setIsPlaying(true);
-      audioref.current.play();
-      playAnimationRef.current = requestAnimationFrame(repeat);
-    }
-  };
-  //
+
   const nextMusic = () => {
     setIsPlaying(true);
     let nextsong = list.indexOf(music_name) + 1;
@@ -67,6 +59,15 @@ const MusicPlayer = ({
     setDuration(seconds);
     progressBarRef.current.max = seconds;
   };
+  //
+  useEffect(() => {
+    if (isPlaying) {
+      audioref.current.play();
+    } else {
+      audioref.current.pause();
+    }
+    playAnimationRef.current = requestAnimationFrame(repeat);
+  }, [isPlaying, audioref, repeat]);
 
   return (
     <footer
@@ -85,12 +86,12 @@ const MusicPlayer = ({
         <BiSkipPrevious />
       </button>
       {isPlaying ? (
-        <button className="btnStyle" onClick={playbtn}>
+        <button className="btnStyle" onClick={togglePlayPause}>
           {/* <button className="btnStyle" onClick={() => setIsPlaying(true)}> */}
           <AiFillPauseCircle />
         </button>
       ) : (
-        <button className="btnStyle" onClick={playbtn}>
+        <button className="btnStyle" onClick={togglePlayPause}>
           {/* <button className="btnStyle" onClick={() => setIsPlaying(false)}> */}
           <AiFillPlayCircle />
         </button>
